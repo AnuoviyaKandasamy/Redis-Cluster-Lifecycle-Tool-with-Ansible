@@ -1,0 +1,8 @@
+---
+- name: Install Redis on all nodes
+  hosts: redis
+  become: true
+
+  roles:
+    - redis
+

@@ -1,0 +1,24 @@
+---
+- name: Upgrade Redis Package
+  hosts: redis
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade redis-server
+      apt:
+        name: redis-server
+        state: latest
+
+    - name: Check cluster health
+      shell: redis-cli cluster info
+      register: cluster_info
+      changed_when: false
+
+    - name: Fail if cluster unhealthy
+      fail:
+        msg: Cluster not healthy
+      when: "'cluster_state:ok' not in cluster_info.stdout"

@@ -1,0 +1,151 @@
+---
+# Upgrade Replica 10.10.0.15
+- name: Upgrade replica node 5
+  hosts: redis-node-5
+  become: yes
+
+  tasks:
+    - name: Upgrade redis
+      apt:
+        name: redis-server
+        state: latest
+
+    - name: Restart redis
+      service:
+        name: redis-server
+        state: restarted
+
+    - name: Wait
+      pause:
+        seconds: 10
+
+
+# Upgrade Replica 10.10.0.16
+- name: Upgrade replica node 6
+  hosts: redis-node-6
+  become: yes
+
+  tasks:
+    - name: Upgrade redis
+      apt:
+        name: redis-server
+        state: latest
+
+    - name: Restart redis
+      service:
+        name: redis-server
+        state: restarted
+
+    - pause:
+        seconds: 10
+
+
+# Upgrade Replica 10.10.0.14
+- name: Upgrade replica node 4
+  hosts: redis-node-4
+  become: yes
+
+  tasks:
+    - name: Upgrade redis
+      apt:
+        name: redis-server
+        state: latest
+
+    - name: Restart redis
+      service:
+        name: redis-server
+        state: restarted
+
+    - pause:
+        seconds: 10
+
+
+# Failover Master 11 -> Replica 15
+- name: Failover master 11
+  hosts: redis-node-5
+  gather_facts: false
+
+  tasks:
+    - name: Promote replica
+      shell: redis-cli CLUSTER FAILOVER TAKEOVER
+
+    - pause:
+        seconds: 15
+
+
+# Upgrade old master 11
+- name: Upgrade old master 11
+  hosts: redis-node-1
+  become: yes
+
+  tasks:
+    - apt:
+        name: redis-server
+        state: latest
+
+    - service:
+        name: redis-server
+        state: restarted
+
+    - pause:
+        seconds: 10
+
+
+# Failover Master 12 -> Replica 16
+- name: Failover master 12
+  hosts: redis-node-6
+  gather_facts: false
+
+  tasks:
+    - shell: redis-cli CLUSTER FAILOVER TAKEOVER
+
+    - pause:
+        seconds: 15
+
+
+# Upgrade old master 12
+- name: Upgrade old master 12
+  hosts: redis-node-2
+  become: yes
+
+  tasks:
+    - apt:
+        name: redis-server
+        state: latest
+
+    - service:
+        name: redis-server
+        state: restarted
+
+    - pause:
+        seconds: 10
+
+
+# Failover Master 13 -> Replica 14
+- name: Failover master 13
+  hosts: redis-node-4
+  gather_facts: false
+
+  tasks:
+    - shell: redis-cli CLUSTER FAILOVER TAKEOVER
+
+    - pause:
+        seconds: 15
+
+
+# Upgrade old master 13
+- name: Upgrade old master 13
+  hosts: redis-node-3
+  become: yes
+
+  tasks:
+    - apt:
+        name: redis-server
+        state: latest
+
+    - service:
+        name: redis-server
+        state: restarted
+
+    - pause:
+        seconds: 10

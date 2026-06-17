@@ -1,0 +1,63 @@
+#!/bin/bash
+
+echo "Checking prerequisites..."
+
+if command -v podman >/dev/null 2>&1; then
+    echo "✓ Podman found"
+elif command -v docker >/dev/null 2>&1; then
+    echo "✓ Docker found"
+else
+    echo "✗ Container runtime not found"
+    exit 1
+fi
+
+if command -v ansible-playbook >/dev/null 2>&1; then
+    echo "✓ Ansible found"
+else
+    echo "✗ Ansible not found"
+    exit 1
+fi
+
+cd "$(dirname "$0")/ansible" || exit 1
+
+case "$1" in
+
+provision)
+    ansible-playbook playbooks/provision.yml
+    ;;
+
+status)
+    ansible-playbook playbooks/status.yml
+    ;;
+
+verify)
+    if [ "$2" = "--full" ]; then
+        ansible-playbook playbooks/full_verify.yml
+    else
+        ansible-playbook playbooks/verify.yml
+    fi
+    ;;
+
+seed)
+    ansible-playbook playbooks/data_seed.yml
+    ;;
+
+data-verify)
+    ansible-playbook playbooks/data_verify.yml
+    ;;
+
+upgrade)
+    ansible-playbook playbooks/rolling_upgrade.yml
+    ;;
+
+*)
+    echo "Usage:"
+    echo "./redis-tool provision"
+    echo "./redis-tool status"
+    echo "./redis-tool verify"
+    echo "./redis-tool verify --full"
+    echo "./redis-tool seed"
+    echo "./redis-tool data-verify"
+    echo "./redis-tool upgrade"
+    ;;
+esac

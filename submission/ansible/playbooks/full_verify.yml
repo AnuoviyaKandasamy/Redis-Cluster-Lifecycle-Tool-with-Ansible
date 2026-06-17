@@ -1,0 +1,23 @@
+---
+- name: Full Verification
+  hosts: redis
+  gather_facts: false
+
+  tasks:
+
+    - name: Cluster state
+      shell: redis-cli cluster info
+      register: cluster
+
+    - name: Version
+      shell: redis-server --version
+      register: version
+
+    - name: Replication
+      shell: redis-cli INFO replication
+      register: replication
+
+    - debug:
+        msg:
+          state: "{{ cluster.stdout }}"
+          version: "{{ version.stdout }}"

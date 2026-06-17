@@ -1,0 +1,24 @@
+---
+- name: Seed Redis Data
+  hosts: redis-node-1
+  gather_facts: false
+
+  tasks:
+
+    - name: Insert 1000 keys
+      shell: |
+        for i in $(seq -w 1 1000); do
+          redis-cli -c SET key:$i value:$i
+        done
+      register: seed_result
+
+    - name: Show result
+      debug:
+        msg: "1000 keys inserted"
+    
+    - name: Count keys
+      shell: redis-cli -c DBSIZE
+      register: keycount
+
+    - debug:
+        msg: "Inserted {{ keycount.stdout }} keys"

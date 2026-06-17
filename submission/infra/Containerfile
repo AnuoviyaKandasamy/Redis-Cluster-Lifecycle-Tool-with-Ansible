@@ -1,0 +1,32 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y \
+    openssh-server \
+    sudo \
+    curl \
+    wget \
+    vim \
+    net-tools \
+    iproute2 \
+    rsync \
+    python3 && \
+    mkdir /var/run/sshd
+
+RUN useradd -m -s /bin/bash ansible
+
+RUN mkdir -p /home/ansible/.ssh
+
+COPY authorized_keys /home/ansible/.ssh/authorized_keys
+
+RUN chown -R ansible:ansible /home/ansible/.ssh && \
+    chmod 700 /home/ansible/.ssh && \
+    chmod 600 /home/ansible/.ssh/authorized_keys
+
+RUN echo "ansible ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd","-D"]

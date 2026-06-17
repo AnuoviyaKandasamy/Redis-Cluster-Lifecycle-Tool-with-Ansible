@@ -1,0 +1,23 @@
+---
+- name: Verify Redis Cluster
+  hosts: redis
+  gather_facts: false
+
+  tasks:
+    - name: Check Redis responds
+      shell: redis-cli ping
+      register: redis_ping
+      changed_when: false
+
+    - name: Show ping result
+      debug:
+        var: redis_ping.stdout
+
+    - name: Cluster Info
+      shell: redis-cli cluster info
+      register: cluster
+      changed_when: false
+
+    - name: Show Cluster Info
+      debug:
+        var: cluster.stdout

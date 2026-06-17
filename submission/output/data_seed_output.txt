@@ -1,0 +1,12 @@
+Checking prerequisites...
+✓ Docker found
+✓ Ansible found
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+[WARNING]: Could not match supplied host pattern, ignoring: redis-node-1
+
+PLAY [Seed Redis Data] *********************************************************
+skipping: no hosts matched
+
+PLAY RECAP *********************************************************************
+

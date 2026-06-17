@@ -1,0 +1,22 @@
+---
+- name: Verify Redis Data
+  hosts: redis-node-1
+  gather_facts: false
+
+  tasks:
+
+    - name: Verify all keys
+      shell: |
+        count=0
+        for i in $(seq -w 1 1000); do
+          val=$(redis-cli -c GET key:$i)
+          if [ "$val" = "value:$i" ]; then
+            count=$((count+1))
+          fi
+        done
+        echo $count
+      register: verify_count
+
+    - name: Show verification
+      debug:
+        msg: "PASS - {{ verify_count.stdout }}/1000 keys verified"

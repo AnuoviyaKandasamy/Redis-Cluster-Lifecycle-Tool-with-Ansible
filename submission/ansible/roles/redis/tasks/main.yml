@@ -1,0 +1,51 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install redis
+  apt:
+    name: redis-server
+    state: present
+
+- name: Create redis data directory
+  file:
+    path: "{{ redis_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Deploy redis config
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis/redis.conf
+  notify: Restart redis
+
+- name: Ensure redis running
+  service:
+    name: redis-server
+    state: started
+    enabled: true
+
+
+- name: Check cluster state
+  shell: redis-cli cluster info
+  register: cluster_info
+  changed_when: false
+  failed_when: false
+  run_once: true
+  delegate_to: redis-node-1
+
+
+- name: Create Redis Cluster
+  shell: |
+    yes yes | redis-cli --cluster create \
+    10.10.0.11:6379 \
+    10.10.0.12:6379 \
+    10.10.0.13:6379 \
+    10.10.0.14:6379 \
+    10.10.0.15:6379 \
+    10.10.0.16:6379 \
+    --cluster-replicas 1
+  run_once: true
+  delegate_to: redis-node-1
+  when: "'cluster_state:ok' not in cluster_info.stdout"
